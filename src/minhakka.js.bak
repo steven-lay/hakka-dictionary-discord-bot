@@ -1,0 +1,53 @@
+const puppeteer = require('puppeteer');
+
+let word = '日';
+
+(async () => {    
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto('https://humanum.arts.cuhk.edu.hk/Lexis/lexi-mf/dialect.php');
+    await page.waitForSelector('#word');
+
+    await page.$eval("#word", el => el.value = '日');
+
+    console.log("value typed in word:", await page.evaluate(() => document.getElementById('word').value));
+
+    await page.$eval('input[value=搜索]', form => form.click() );
+
+    console.log("form submitted");
+
+    await page.waitForSelector('#bodyContent');
+
+    console.log("found dialect table");
+
+    let rows = await page.evaluate(() => {
+        const tds = Array.from(document.querySelectorAll('#dialectTable tr td'))
+        return tds.map(td => td.innerText)
+    });
+    
+    console.log(rows);
+
+    
+    /*
+    console.log("found f_han");
+
+    // type in value into box
+    await page.$eval("#f_han", el => el.value = '日');
+
+    console.log("value typed in f-han:", await page.evaluate(() => document.getElementById('f_han').value));
+
+    await page.$eval('input[type=submit]', form => form.click() );
+    
+    console.log("clicked submit");
+
+    await page.waitForSelector('table');
+
+    console.log("found table");
+
+    let rows = await page.evaluate(() => {
+        const tds = Array.from(document.querySelectorAll('#chojizone tr td'))
+        return tds.map(td => td.innerText)
+    });
+    console.log(rows);
+    */
+})();
