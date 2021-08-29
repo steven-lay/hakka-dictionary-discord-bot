@@ -49,11 +49,15 @@ client.on('interactionCreate', async (interaction) => {
             return ['🔄'].includes(reaction.emoji.name) && user.id === interaction.user.id;
         };
         
-        const collector = message.createReactionCollector({ filter, time: 30000 });
+        const collector = message.createReactionCollector({ filter, time: 60000 });
         
         collector.on('collect', async () => {
             resultNum = (resultNum == 0) ? 1 : 0; 
             await interaction.editReply({embeds: [embedBuild(arg, resultNum, numResults, results[resultNum])]}, { fetchReply: true })
+        });
+
+        collector.on('end', async () => {
+            message.reactions.removeAll();
         });
 	}
 });

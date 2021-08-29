@@ -8,7 +8,6 @@ const rootCas = require('ssl-root-cas').create();
 rootCas.addFile(path.resolve(__dirname, 'intermediate_syndict.pem'));
 const httpsAgent = new https.Agent({ca: rootCas});
 
-module.exports = 
 async function getResults(term) {
     const url = 'https://www.syndict.com/w2p.php?word=' + term + '&item=hak';
     const resp = await axios.default.get(encodeURI(url), { httpsAgent });
@@ -38,3 +37,5 @@ async function getResults(term) {
     
     return results;
 }
+
+module.exports = getResults;
