@@ -35,5 +35,5 @@ async function getResults(term) {
         result_string += '\n';
     }
     
-    return result_string;
+    return [result_string, i];
 }
