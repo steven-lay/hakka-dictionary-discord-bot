@@ -22,18 +22,19 @@ async function getResults(term) {
     /* Get results group */
     const tem_groups = dom.window.document.querySelectorAll('.tem_group');
 
-    let result_string = '';
+    let results = [];
     let i = 1;
 
     for (let val of tem_groups) {
-        result_string += '\n**Pronunciation ' + i++ + ':**';
+        let result_string = '\n**Pronunciation ' + i++ + ':**';
         
         /* Iterate through each pronunciation, remove white spaces including U+200B */
         val.querySelectorAll('.yinLi').forEach((a) => {
             result_string += '\n' + a.textContent.trim().replace(/\s+/g, " ").replace(/\u200B/g,"");
         })
         result_string += '\n';
+        results.push(result_string)
     }
     
-    return [result_string, i];
+    return results;
 }
