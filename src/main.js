@@ -1,65 +1,97 @@
 // Require the necessary discord.js classes
-const { Message } = require('discord.js');
-const { Client, MessageEmbed } = require('discord.js');
-const { token } = require('./config.json');
+import { Client, MessageEmbed } from 'discord.js';
+import syn from './syndict.js';
+import dotenv from 'dotenv';
 
-const syn = require('./syndict.js');
+dotenv.config();
 
-const client = new Client({ intents: ["GUILDS", "GUILD_MESSAGES", "DIRECT_MESSAGES", "GUILD_MESSAGE_REACTIONS", "DIRECT_MESSAGE_REACTIONS"], 
-                            partials: ['MESSAGE', 'CHANNEL', 'REACTION']});
+const client = new Client({
+	intents: [
+		'GUILDS',
+		'GUILD_MESSAGES',
+		'DIRECT_MESSAGES',
+		'GUILD_MESSAGE_REACTIONS',
+		'DIRECT_MESSAGE_REACTIONS',
+	],
+	partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
+});
 
 client.once('ready', () => {
-    console.log(client.user.username, 'is ready!');
-    // client.api.applications(client.user.id).commands('881437432308989952').delete(); 
-    // (async () => { console.log(await client.api.applications(client.user.id).commands.get());})();
+	console.log(`${client.user.username} is ready!`);
+	// client.api.applications(client.user.id).commands('881437432308989952').delete();
+	// (async () => { console.log(await client.api.applications(client.user.id).commands.get());})();
 });
 
 function embedBuild(arg, resultNum, numResults, result) {
-    const embed = new MessageEmbed()
-    .setColor('#6b9ff2')
-    .setTitle('Showing results for ' + arg)    
-    .setDescription(result)
-    .setFooter(`Pronunciation ${resultNum+1} of ${numResults}`);
+	const embed = new MessageEmbed()
+		.setColor('#6b9ff2')
+		.setTitle(`Showing results for ${arg}`)
+		.setDescription(result)
+		.setFooter(`Pronunciation ${resultNum + 1} of ${numResults}`);
 
-    return embed;
+	return embed;
 }
 
 client.on('interactionCreate', async (interaction) => {
 	if (!interaction.isCommand()) return;
 
-    if (interaction.commandName === 'syn') {
-        const arg = interaction.options.getString('character');
-    
-        if (arg.length > 1 || !arg.match(/[\u3400-\u9FBF]/)) {
-            await interaction.reply("Please input a single Chinese character.");
-            return;
-        }
+	if (interaction.commandName === 'syn') {
+		const arg = interaction.options.getString('character');
 
-        const results = await syn(arg);
-        const numResults = results.length;
-        let resultNum = 0;
+		if (arg.length > 1 || !arg.match(/[\u3400-\u9FBF]/)) {
+			await interaction.reply('Please input a single Chinese character.');
+			return;
+		}
 
-        await interaction.reply({embeds: [embedBuild(arg, resultNum, numResults, results[resultNum])]}, { fetchReply: true });
-        const message = await interaction.fetchReply();
+		const results = await syn(arg);
+		const numResults = results.length;
+		let resultNum = 0;
 
-        if (numResults > 1)
-            message.react('🔄');
+		await interaction.reply(
+			{
+				embeds: [
+					embedBuild(arg, resultNum, numResults, results[resultNum]),
+				],
+			},
+			{ fetchReply: true }
+		);
+		const message = await interaction.fetchReply();
 
-        const filter = (reaction, user) => {
-            return ['🔄'].includes(reaction.emoji.name) && user.id === interaction.user.id;
-        };
-        
-        const collector = message.createReactionCollector({ filter, time: 60000 });
-        
-        collector.on('collect', async () => {
-            resultNum = (resultNum == 0) ? 1 : 0; 
-            await interaction.editReply({embeds: [embedBuild(arg, resultNum, numResults, results[resultNum])]}, { fetchReply: true })
-        });
+		if (numResults > 1) message.react('🔄');
 
-        collector.on('end', async () => {
-            message.reactions.removeAll();
-        });
+		const filter = (reaction, user) => {
+			return (
+				['🔄'].includes(reaction.emoji.name) &&
+				user.id === interaction.user.id
+			);
+		};
+
+		const collector = message.createReactionCollector({
+			filter,
+			time: 60000,
+		});
+
+		collector.on('collect', async () => {
+			resultNum = resultNum == 0 ? 1 : 0;
+			await interaction.editReply(
+				{
+					embeds: [
+						embedBuild(
+							arg,
+							resultNum,
+							numResults,
+							results[resultNum]
+						),
+					],
+				},
+				{ fetchReply: true }
+			);
+		});
+
+		collector.on('end', async () => {
+			message.reactions.removeAll();
+		});
 	}
 });
 
-client.login(token);
+client.login(process.env.token);
