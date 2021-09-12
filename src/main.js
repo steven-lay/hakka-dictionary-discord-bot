@@ -72,7 +72,7 @@ client.on('interactionCreate', async (interaction) => {
 		});
 
 		collector.on('collect', async () => {
-			resultNum = resultNum == 0 ? 1 : 0;
+			resultNum = resultNum < numResults ? ++resultNum : 0;
 			await interaction.editReply(
 				{
 					embeds: [
