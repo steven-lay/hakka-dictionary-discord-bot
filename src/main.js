@@ -1,6 +1,6 @@
 // Require the necessary discord.js classes
 import { Client, MessageEmbed } from 'discord.js';
-import syn from './syndict.js';
+import { getSyndictResults } from './syndict.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -43,7 +43,7 @@ client.on('interactionCreate', async (interaction) => {
 			return;
 		}
 
-		const results = await syn(arg);
+		const results = await getSyndictResults(arg);
 		const numResults = results.length;
 		let resultNum = 0;
 

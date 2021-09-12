@@ -3,11 +3,11 @@ import jsdom from 'jsdom';
 import axios from 'axios';
 import sslrootCas from 'ssl-root-cas';
 
-const rootCas = sslrootCas.create();
-rootCas.addFile('./src/intermediate_syndict.pem');
-const httpsAgent = new https.Agent({ ca: rootCas });
+export async function getSyndictResults(term) {
+	const rootCas = sslrootCas.create();
+	rootCas.addFile('./src/intermediate_syndict.pem');
+	const httpsAgent = new https.Agent({ ca: rootCas });
 
-async function getResults(term) {
 	const url = `https://www.syndict.com/w2p.php?word=${term}&item=hak`;
 	const resp = await axios.get(encodeURI(url), { httpsAgent });
 	const dom = new jsdom.JSDOM(resp.data);
@@ -41,5 +41,3 @@ async function getResults(term) {
 
 	return results;
 }
-
-export default getResults;
