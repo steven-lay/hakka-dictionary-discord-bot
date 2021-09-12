@@ -1,6 +1,7 @@
 // Require the necessary discord.js classes
-import { Client, MessageEmbed } from 'discord.js';
-import { getSyndictResults } from './syndict.js';
+import { Client } from 'discord.js';
+import { getSyndictResults } from './syndict';
+import { embedBuild } from './utils';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -21,16 +22,6 @@ client.once('ready', () => {
 	// client.api.applications(client.user.id).commands('881437432308989952').delete();
 	// (async () => { console.log(await client.api.applications(client.user.id).commands.get());})();
 });
-
-function embedBuild(arg, resultNum, numResults, result) {
-	const embed = new MessageEmbed()
-		.setColor('#6b9ff2')
-		.setTitle(`Showing results for ${arg}`)
-		.setDescription(result)
-		.setFooter(`Pronunciation ${resultNum + 1} of ${numResults}`);
-
-	return embed;
-}
 
 client.on('interactionCreate', async (interaction) => {
 	if (!interaction.isCommand()) return;
