@@ -42,12 +42,13 @@ client.on('interactionCreate', async (interaction) => {
 
 	const results = await getSyndictResults(arg);
 
-	if (!results) {
+	if (!results || !results.length) {
 		await interaction.editReply(`No results found for ${arg}`);
 		return;
 	}
 
 	const numResults = results.length;
+
 	let resultNum = 0;
 
 	await interaction.editReply(
