@@ -29,8 +29,8 @@ client.on('interactionCreate', async (interaction) => {
 	if (interaction.commandName === 'syn') {
 		const arg = interaction.options.getString('character');
 
-		if (arg.length > 1 || !arg.match(/[\u3400-\u9FBF]/)) {
-			await interaction.reply('Please input a single Chinese character.');
+		if (!arg.match(/[\u3400-\u9FBF]/)) {
+			await interaction.reply('Please input Chinese characters');
 			return;
 		}
 
