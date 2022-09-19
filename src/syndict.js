@@ -1,15 +1,13 @@
 import { parseHTML } from 'linkedom';
 import https from 'https';
 import axios from 'axios';
-import sslrootCas from 'ssl-root-cas';
 
 export async function getSyndictResults(term) {
-	const rootCas = sslrootCas.create();
-	rootCas.addFile('./src/intermediate_syndict.pem');
-	const httpsAgent = new https.Agent({ ca: rootCas });
+	const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
 	const url = `https://www.syndict.com/w2p.php?word=${term}&item=hak`;
 	const resp = await axios.get(encodeURI(url), { httpsAgent });
+
 	const { document } = parseHTML(resp.data);
 
 	/* Check if no results could be found */
