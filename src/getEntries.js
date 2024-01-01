@@ -79,7 +79,7 @@ async function getMoedict(searchTerm) {
   let resultStr = ''
 
   h.forEach((entry, count) => {
-    resultStr += `\n**P ronunciation ${++count}:**${entry.p
+    resultStr += `\n**Pronunciation ${++count}:**${entry.p
       .replace(/四⃞/g, "\n四縣 Sixian: ")
       .replace(/海⃞/g, "\n海陸 Hailu: ")
       .replace(/大⃞/g, "\n大埔 Dabu: ")
