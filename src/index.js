@@ -39,12 +39,25 @@ client.on(Events.InteractionCreate, async interaction => {
     /* Stall for time as the result fetching may take awhile */
     await interaction.deferReply({ ephemeral: true })
 
+    /*
+      TODO
+
+      Issue:
+      Due to embed string length limit (1024 characters), need to paginate results in certain cases.
+
+      Action:
+      - syndictResults and moeDictResults to be changed to string arrays of results
+      - Use reaction collector to paginate and navigate between array values
+      - Show react to toggle between syndict and moedict results, reset array index to 0 if toggled
+      - Do not paginate when both of the arrays length <= 1 (single or no result case)
+    */
+
     const syndictResults = await getSyndict(searchTerm)
     /* Moedict only accepts Traditional characters so convert it if necessary */
     const moedictResults = await getMoedict(tify(searchTerm))
 
     /* Do something else if 1024 character limit for discord embeds is exceeded */
-    if ((syndictResults.length + moedictResults.length) > 1000) {
+    if ((syndictResults?.length + moedictResults?.length) > 1000) {
       await interaction.editReply("Too many results returned, cannot display. Will fix this when I can. -Loger")
       return
     }
@@ -54,8 +67,8 @@ client.on(Events.InteractionCreate, async interaction => {
       .setTitle(`Results for search term ${searchTerm}`)
       .setColor(0x0099FF)
       .addFields(
-        { name: 'Syndict', value: syndictResults, inline: true },
-        { name: 'Moedict', value: moedictResults, inline: true },
+        { name: 'Syndict', value: syndictResults ? syndictResults : "No results", inline: true },
+        { name: 'Moedict', value: moedictResults ? moedictResults : "No results", inline: true },
       )
 
     await interaction.editReply({ embeds: [replyEmbed] })
