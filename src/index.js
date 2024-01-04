@@ -37,7 +37,7 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
     /* Stall for time as the result fetching may take awhile */
-    await interaction.deferReply({ ephemeral: true })
+    await interaction.deferReply()
 
     /*
       TODO
