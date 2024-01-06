@@ -1,6 +1,7 @@
+// @ts-check
 const { parseHTML } = require('linkedom')
 
-const nameMap = {
+const placeNameMap = {
   '梅縣': '梅縣 Meixian',
   '博羅': '博羅 Boluo',
   '大埔': '大埔 Dabu',
@@ -27,7 +28,7 @@ const nameMap = {
   '綜合': '綜合 Mixed',
 }
 
-const superToSubMap = {
+const superscriptToRegularMap = {
   '¹': '1',
   '²': '2',
   '³': '3',
@@ -35,64 +36,72 @@ const superToSubMap = {
   '⁵': '5'
 }
 
-async function getSyndict(searchTerm) {
+/**
+ * Returns search results from Syndict.
+ * @param {string} searchTerm The search term
+ * @return {Promise<string[]>} Array of results
+ */
+async function getSyndictResults(searchTerm) {
   const response = await fetch(`https://www.syndict.com/w2p.php?word=${searchTerm}&item=hak`)
   const data = await response.text()
+  
   const { document } = parseHTML(data)
 
   /* Return if no results found */
-  if (!document.querySelectorAll('.tem_group').length) {
-    return null
-  }
+  if (!document.querySelectorAll('.tem_group').length)
+    return ["No results found"]
 
-  let results = '';
+  let results = []
 
-  document.querySelectorAll('.tem_group').forEach((val, count) => {
-    results += `\n**Pronunciation ${++count}:**`
-
+  document.querySelectorAll('.tem_group').forEach(val => {
+    let pronunciationResult = ''
+  
     /* Iterate through each pronunciation, fix formatting */
-    val.querySelectorAll('.yinLi').forEach(a => {
-      const tempLine = a.textContent
+    val.querySelectorAll('.yinLi').forEach(entry => {
+      // @ts-ignore
+      const tempLine = entry.textContent
         .trim()
         .replace(/\s+/g, ' ')
         .replace(/\u200B/g, '')
-        .replace(/\p{Script=Han}+/gu, match => nameMap[match])
-
-      results += `\n${tempLine}`
+        .replace(/\p{Script=Han}+/gu, match => placeNameMap[match])
+  
+      pronunciationResult += `\n${tempLine}`
     });
-
-    results += '\n'
-  })
-
+  
+    results.push(pronunciationResult)
+  });
+  
   return results;
 }
 
-async function getMoedict(searchTerm) {
+/**
+ * Returns search results from Moedict.
+ * @param {string} searchTerm The search term
+ * @return {Promise<string[]>} Array of results
+ */
+async function getMoedictResults(searchTerm) {
   const response = await fetch(`https://www.moedict.tw/h/${searchTerm}.json`)
 
-  if (!response.ok) {
-    return null
-  }
+  if (!response.ok)
+    return ["No results found"]
 
   const { h } = await response.json()
 
-  let resultStr = ''
-
-  h.forEach((entry, count) => {
-    resultStr += `\n**Pronunciation ${++count}:**${entry.p
+  const formattedResults = h.map(entry => 
+    `${entry.p
       .replace(/四⃞/g, "\n四縣 Sixian: ")
       .replace(/海⃞/g, "\n海陸 Hailu: ")
       .replace(/大⃞/g, "\n大埔 Dabu: ")
       .replace(/平⃞/g, "\n饒平 Raoping: ")
       .replace(/安⃞/g, "\n詔安 Zhaoan: ")
       .replace(/南⃞/g, "\n南四縣 South Sixian: ")
-      .replaceAll(/\p{No}/gu, match => superToSubMap[match])}\n`
-  });
+      .replaceAll(/\p{No}/gu, match => superscriptToRegularMap[match])}\n`
+  )
 
-  return resultStr
+  return formattedResults
 }
 
 module.exports = {
-  getSyndict,
-  getMoedict
+  getSyndictResults,
+  getMoedictResults
 }
