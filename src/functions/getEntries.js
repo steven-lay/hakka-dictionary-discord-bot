@@ -42,8 +42,15 @@ const superscriptToRegularMap = {
  * @return {Promise<string[]>} Array of results
  */
 async function getSyndictResults(searchTerm) {
-  const response = await fetch(`https://www.syndict.com/w2p.php?word=${searchTerm}&item=hak`)
-  const data = await response.text()
+  let data
+
+  try {
+    const response = await fetch(`https://www.syndict.com/w2p.php?word=${searchTerm}&item=hak`)
+    data = await response.text()
+  } catch (err) {
+    console.error("Error fetching Syndict results: ", err)
+    return ["Cannot fetch Syndict results"]
+  }
 
   const { document } = parseHTML(data)
 
